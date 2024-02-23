@@ -1,6 +1,6 @@
-# KeyValuePairStore
+# AerensStore.KeyValuePairStore
 
-KeyValuePairStore is a project within the AerensStores solution that provides a key-value store for storing data. The data is stored in a file and can be of any type that can be serialized to JSON.
+AerensStore.KeyValuePairStore is a project within the AerensStores solution that provides a key-value store for storing data. The data is stored in a file and can be of any type that can be serialized to JSON.
 
 ## Classes
 
