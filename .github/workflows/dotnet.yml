@@ -27,4 +27,10 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test with coverage
-      run: dotnet test --collect:"Code Coverage;Format=Xml;CoverageFileName=coverage.xml" --results-directory ./coverage
+      run: dotnet test --collect:"Code Coverage;Format=Xml;CoverageFileName=test-results.coverage.xml" --results-directory ./coverage
+    - name: Publish artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results*
+        path: ./coverage
+      
