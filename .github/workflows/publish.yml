@@ -33,24 +33,3 @@ jobs:
           nuget-api-key: ${{ secrets.NUGET_API_KEY }}
           nuget-source: https://api.nuget.org/v3/index.json
           package: './artifacts/*.nupkg'
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{version}}
-          release_name: Release v${{version}}
-          body: |
-            This is the release of the KeyValueStore project for commit ${{ github.sha }}.
-          draft: false
-          prerelease: false
