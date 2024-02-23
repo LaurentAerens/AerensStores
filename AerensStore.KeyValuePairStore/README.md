@@ -1,4 +1,4 @@
-# AerensStore.KeyValuePairStore
+# AerensStores.KeyValuePairStore
 
 AerensStore.KeyValuePairStore is a project within the AerensStores solution that provides a key-value store for storing data. The data is stored in a file and can be of any type that can be serialized to JSON.
 
@@ -51,7 +51,7 @@ Console.WriteLine("Value of demokey: " + index);
 
 the first output will be 1, the second time you run the code it will be 2, and so on. The value is stored in a file and will be kept even if you close the application.
 
->:bulb: **note:** if you get a key that does not exist it wil return 0 (or the equivalent for the type requested).
+> :bulb:  **note:** if you get a key that does not exist it wil return 0 (or the equivalent for the type requested).
 
 #### more advanced demo with Deltatime
 
