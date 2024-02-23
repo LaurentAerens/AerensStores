@@ -1,0 +1,37 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "master", "test", "develop" ]
+  pull_request:
+    branches: [ "master", "test", "develop"]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+    - name: Navigate to test project
+      run: cd AerensStoreUnittest
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test with coverage
+      run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+    - name: Check coverage
+      run: |
+        coverage=$(grep '<CoveragePercent>' TestResults/coverage.opencover.xml | grep -oP '\d+(?=%)')
+        if (( coverage < 80 )); then
+          echo "Code coverage is $coverage%, which is below the required 80%"
+          exit 1
+        fi
