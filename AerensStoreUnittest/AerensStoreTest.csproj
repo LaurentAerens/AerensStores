@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AerensStore.KeyValuePairStore\AerensStores.KeyValuePairStore.csproj" />
-    <ProjectReference Include="..\KeyValuePairStore\KeyValuePairStore.csproj" />
   </ItemGroup>
 
 </Project>

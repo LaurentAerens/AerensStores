@@ -9,15 +9,21 @@
     <Description>This is an small and easy package to store some keyvaluepairs persistent into a json.
 There is also the possibility to store with a certain timedelta versioning and a cleanup for older versions.</Description>
     <Copyright></Copyright>
-    <PackageProjectUrl>https://github.com/LaurentAerens/AerensStores/tree/master/KeyValuePairStore</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/LaurentAerens/AerensStores</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/LaurentAerens/AerensStores/tree/master/KeyValuePairStore</RepositoryUrl>
+    <RepositoryUrl>https://github.com/LaurentAerens/AerensStores/tree/master/AerensStore.KeyValuePairStore</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\images\icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
