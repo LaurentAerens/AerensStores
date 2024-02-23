@@ -27,10 +27,10 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test with coverage
-      run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+      run: dotnet test --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/
     - name: Check coverage
       run: |
-        coverage=$(grep '<CoveragePercent>' TestResults/coverage.opencover.xml | grep -oP '\d+(?=%)')
+        coverage=$(grep '<CoveragePercent>' ./AerensStoreUnittest/TestResults/coverage.opencover.xml | grep -oP '\d+(?=%)')
         if (( coverage < 80 )); then
           echo "Code coverage is $coverage%, which is below the required 80%"
           exit 1
