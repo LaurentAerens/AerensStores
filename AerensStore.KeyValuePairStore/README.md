@@ -33,7 +33,48 @@ If these parameters are not provided, the `KeyValueStore` will use default value
 
 ## Getting Started
 
-TODO: write after nuget is published
+You can get started with the KeyValuePairStore project by installing the NuGet package. You can do this by running the following command in the Package Manager Console:
+
+```powershell
+paket add AerensStores.KeyValuePairStore --version 1.0.1
+```
+
+After this basic usage is very simple, here a simple demo:
+
+```csharp
+KeyValueStore keyValueStore = new KeyValueStore();
+int index = keyValueStore.GetInt("demokey");
+index++;
+keyValueStore.SetInt("demokey", index);
+Console.WriteLine("Value of demokey: " + index);
+```
+
+the first output will be 1, the second time you run the code it will be 2, and so on. The value is stored in a file and will be kept even if you close the application.
+
+>:bulb: **note:** if you get a key that does not exist it wil return 0 (or the equivalent for the type requested).
+
+#### more advanced demo with Deltatime
+
+this is a more advanced demo where we use the `DeltaTime` class to create a yearly report. For this report we have a few event that increment a counter, and we want to keep track of the yearly count. Or store some data.
+
+```csharp
+DeltaTime deltaTime = new DeltaTime(1, 0, 0, 0);
+KeyValueStore keyValueStore = new KeyValueStore(continuesStoreTime: deltaTime, cleanUpTime: 5); // clean up data older then 5 years (aka 5 * DeltaTime)
+int FileProcessCount = keyValueStore.GetInt("FileProcessCount");
+FileProcessCount++;
+keyValueStore.SetInt("FileProcessCount", FileProcessCount);
+int SomeRandomData = Random.Next(0, 100);
+keyValueStore.SetInt("SomeRandomData", SomeRandomData);
+// now for the data of this year so far
+Console.WriteLine("FileProcessCount: " + keyValueStore.GetInt("FileProcessCount"));
+Console.WriteLine("SomeRandomData: " + keyValueStore.GetInt("SomeRandomData"));
+// now for the data of last year
+Console.WriteLine("FileProcessCount last year: " + keyValueStore.GetInt("FileProcessCount", 1));
+Console.WriteLine("SomeRandomData last year: " + keyValueStore.GetInt("SomeRandomData", 1));
+```
+
+:bulb: **note:** All get functions will return a **InvalidCastException** if the data is not of the type requested, exept the **char** this will convert ints to char folling the Convert.ToChar() documentation. 
+
 ## Contributing
 
 Contributions to the KeyValuePairStore project are welcome. If you have a feature request, bug report, or want to contribute code, please open an issue or pull request on the GitHub repository.
