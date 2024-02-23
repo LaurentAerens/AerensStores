@@ -256,7 +256,19 @@ public class KeyValueStore
         }
         else
         {
-            throw new InvalidCastException($"The value for key '{key}' is not of type 'int'.");
+            try
+            {
+                return Convert.ToInt32(value);
+            }
+            catch (InvalidCastException)
+            {
+                throw new InvalidCastException($"The value for key '{key}' is not of type 'int'.");
+            }
+            catch (FormatException)
+            {
+                throw new InvalidCastException($"The value for key '{key}' is not of type 'int'."); 
+            }
+            
         }
     }
 
@@ -370,7 +382,22 @@ public class KeyValueStore
         }
         else
         {
-            throw new InvalidCastException($"The value for key '{key}' is not of type 'char'.");
+            try
+            {
+                char charvalue = Convert.ToChar(value);
+                if (charvalue == '\0')
+                {
+                    throw new InvalidCastException($"The value for key '{key}' is not of type 'char'.");
+                }
+                else
+                {
+                    return charvalue;
+                }
+            }
+            catch (InvalidCastException)
+            {
+                throw new InvalidCastException($"The value for key '{key}' is not of type 'char'.");
+            }
         }
     }
 

@@ -54,7 +54,7 @@ namespace AerensStoreTest
         {
             var result = _store.Get("nonExistingTestKey");
 
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
         [Test]
         public void Get_WhenOlderMonthIsWithinDeltaTime_ReturnsOldValue()
@@ -72,7 +72,7 @@ namespace AerensStoreTest
             string value = "testValue";
             CreateNewStore(date, value, path, new DeltaTime(months: 3));
             var result = _store.Get(testKey);
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
         [Test]
         public void Set_OverwritesKeyWithinDeltaTimeMonth_SetsValueForKey()
@@ -93,7 +93,7 @@ namespace AerensStoreTest
             string value = "testValue";
             CreateNewStore(date, value, path, new DeltaTime(hours: 3));
             var result = _store.Get(testKey);
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
         [Test]
         public void Set_OverwritesKeyWithinDeltaTimeHour_SetsValueForKey()
@@ -134,7 +134,7 @@ namespace AerensStoreTest
             _store = new KeyValueStore(path);
             var Oldresult = _store.Get(testKey);
             var Newresult = _store.Get(newKeyName);
-            Assert.IsNull(Oldresult);
+            Assert.That(Oldresult, Is.Null);
             Assert.That(Newresult, Is.EqualTo(newValue));
         }
         [Test]
