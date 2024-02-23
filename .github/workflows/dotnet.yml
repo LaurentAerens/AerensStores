@@ -30,7 +30,7 @@ jobs:
       run: dotnet test --collect:"Code Coverage;Format=Xml;CoverageFileName=coverage.xml" --results-directory ./coverage
     - name: Check coverage
       run: |
-        coverage=$(grep '<CoveragePercent>' ./coverage/**/coverage.xml | grep -oP '\d+(?=%)')
+        coverage=$(grep '<CoveragePercent>' ./coverage/coverage.xml | grep -oP '\d+(?=%)')
         if (( coverage < 80 )); then
           echo "Code coverage is $coverage%, which is below the required 80%"
           exit 1
