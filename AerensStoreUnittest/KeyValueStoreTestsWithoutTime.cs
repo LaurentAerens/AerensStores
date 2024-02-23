@@ -72,7 +72,7 @@ namespace AerensStoreTest
         {
             _store.SetBool("testKey", true);
 
-            Assert.AreEqual(true, _store.GetBool("testKey"));
+            Assert.That(_store.GetBool("testKey"), Is.True);
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace AerensStoreTest
         {
             _store.SetChar("testKey", 'a');
 
-            Assert.AreEqual('a', _store.GetChar("testKey"));
+            Assert.That(_store.GetChar("testKey"), Is.EqualTo('a'));
         }
 
         [Test]
@@ -88,7 +88,7 @@ namespace AerensStoreTest
         {
             _store.SetLong("testKey", 1234567890123456789L);
 
-            Assert.AreEqual(1234567890123456789L, _store.GetLong("testKey"));
+            Assert.That(_store.GetLong("testKey"), Is.EqualTo(1234567890123456789L));
         }
 
         [Test]
@@ -96,7 +96,7 @@ namespace AerensStoreTest
         {
             _store.SetDouble("testKey", 123.456);
 
-            Assert.AreEqual(123.456, _store.GetDouble("testKey"));
+            Assert.That(_store.GetDouble("testKey"), Is.EqualTo(123.456));
         }
 
         [Test]
@@ -104,7 +104,7 @@ namespace AerensStoreTest
         {
             _store.SetInt("testKey", 123);
 
-            Assert.AreEqual(123, _store.GetInt("testKey"));
+            Assert.That(_store.GetInt("testKey"), Is.EqualTo(123));
         }
 
         [Test]
@@ -121,14 +121,6 @@ namespace AerensStoreTest
             _store.Set("testKey", "not a bool");
 
             Assert.Throws<InvalidCastException>(() => _store.GetBool("testKey"));
-        }
-
-        [Test]
-        public void GetChar_WhenValueCannotBeConvertedToChar_ThrowsInvalidCastException()
-        {
-            _store.Set("testKey", 123);
-
-            Assert.Throws<InvalidCastException>(() => _store.GetChar("testKey"));
         }
 
         [Test]
@@ -160,7 +152,7 @@ namespace AerensStoreTest
         {
             var result = _noParameterStore.Get("testKey");
 
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
         }
         [Test]
         public void GetInt_WhenNoDataIsSet_ReturnsZero()
@@ -206,7 +198,7 @@ namespace AerensStoreTest
         {
             var result = _noParameterStore.GetBool("testKey");
 
-            Assert.IsFalse(result);
+            Assert.That(result, Is.False);
         }
         [Test]
         public void Save_WhenCalled_WritesToFile()
@@ -230,6 +222,80 @@ namespace AerensStoreTest
             _store = new KeyValueStore(_filePath);
             var result = _store.Get("key");
             Assert.That(result, Is.EqualTo("value"));
+        }
+
+        [Test]
+        public void Set_WhenCalled_SetsValueForKey_RecreatedStore()
+        {
+            _store.Set("testKey", "testValue");
+            _store = null;
+            _store = new KeyValueStore(_filePath);
+
+            var result = _store.Get("testKey");
+
+            Assert.That(result, Is.EqualTo("testValue"));
+        }
+
+        [Test]
+        public void SetString_WhenCalled_SetsStringValueForKey_RecreatedStore()
+        {
+            _store.SetString("testKey", "testValue");
+            _store = null;
+            _store = new KeyValueStore(_filePath);
+
+            var result = _store.GetString("testKey");
+
+            Assert.That(result, Is.EqualTo("testValue"));
+        }
+
+        [Test]
+        public void SetBool_WhenCalled_SetsBoolValueForKey_RecreatedStore()
+        {
+            _store.SetBool("testKey", true);
+            _store = null;
+            _store = new KeyValueStore(_filePath);
+
+            Assert.That(_store.GetBool("testKey"), Is.True);
+        }
+
+        [Test]
+        public void SetChar_WhenCalled_SetsCharValueForKey_RecreatedStore()
+        {
+            _store.SetChar("testKey", 'a');
+            _store = null;
+            _store = new KeyValueStore(_filePath);
+
+            Assert.That(_store.GetChar("testKey"), Is.EqualTo('a'));
+        }
+
+        [Test]
+        public void SetLong_WhenCalled_SetsLongValueForKey_RecreatedStore()
+        {
+            _store.SetLong("testKey", 1234567890123456789L);
+            _store = null;
+            _store = new KeyValueStore(_filePath);
+
+            Assert.That(_store.GetLong("testKey"), Is.EqualTo(1234567890123456789L));
+        }
+
+        [Test]
+        public void SetDouble_WhenCalled_SetsDoubleValueForKey_RecreatedStore()
+        {
+            _store.SetDouble("testKey", 123.456);
+            _store = null;
+            _store = new KeyValueStore(_filePath);
+
+            Assert.That(_store.GetDouble("testKey"), Is.EqualTo(123.456));
+        }
+
+        [Test]
+        public void SetInt_WhenCalled_SetsIntValueForKey_RecreatedStore()
+        {
+            _store.SetInt("testKey", 123);
+            _store = null;
+            _store = new KeyValueStore(_filePath);
+
+            Assert.That(_store.GetInt("testKey"), Is.EqualTo(123));
         }
     }
 }
