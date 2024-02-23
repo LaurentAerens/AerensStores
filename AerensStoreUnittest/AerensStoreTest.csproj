@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AerensStore.KeyValuePairStore\AerensStore.KeyValuePairStore.csproj" />
+    <ProjectReference Include="..\AerensStore.KeyValuePairStore\AerensStores.KeyValuePairStore.csproj" />
     <ProjectReference Include="..\KeyValuePairStore\KeyValuePairStore.csproj" />
   </ItemGroup>
 
