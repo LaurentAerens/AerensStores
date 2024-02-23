@@ -27,4 +27,4 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test with coverage
-      run: dotnet test -p:coverletOutput=coverage.xml -p:CollectCoverage=true -p:CoverletOutputFormat=opencover -p:Threshold=80 -p:ThresholdStat=Total -p:ExcludeByAttribute=\"Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute\" -p:Exclude=\""[AerensStoreUnittest.*]*\" AerensStoreTest.csproj
+      run: dotnet test --collect:"Code Coverage;Format=Xml;CoverageFileName=coverage.xml" --results-directory ./coverage
