@@ -156,7 +156,7 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key of the value to retrieve.</param>
     /// <returns>The value associated with the specified key, or null if the key is not found.</returns>
-    public object Get(string key, int iterationsAgo = 0 , DateTime lookupdate = DateTime.now , bool Straightlookup = false)
+    public object Get(string key, int iterationsAgo = 0 , DateTime lookupdate = default, bool Straightlookup = false)
     {
         try
         {
@@ -205,7 +205,7 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a string, or empty string if the key does not exist or the value is not a string.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a string.</exception>
-    public string GetString(string key, int iterationsAgo = 0, DateTime lookupdate = DateTime.Now, bool Straightlookup = false)
+    public string GetString(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
     {
         var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
         if (value == null)
@@ -243,7 +243,7 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a integer, or 0 if the key does not exist or the value is not a integer.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a integer.</exception>
-    public int GetInt(string key, int iterationsAgo = 0, DateTime lookupdate = DateTime.Now, bool Straightlookup = false)
+    public int GetInt(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
     {
         var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
         if (value == null)
@@ -293,7 +293,7 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a double, or 0 if the key does not exist or the value is not a double.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a double.</exception>
-    public double GetDouble(string key, int iterationsAgo = 0, DateTime lookupdate = DateTime.Now, bool Straightlookup = false)
+    public double GetDouble(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
     {
         var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
         if (value == null)
@@ -331,7 +331,7 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a long, or 0 if the key does not exist or the value is not a long.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a long.</exception>
-    public long GetLong(string key, int iterationsAgo = 0, DateTime lookupdate = DateTime.Now, bool Straightlookup = false)
+    public long GetLong(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
     {
         var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
         if (value == null)
@@ -369,7 +369,7 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a char, or '\0' if the key does not exist or the value is not a char.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a char.</exception>
-    public char GetChar(string key, int iterationsAgo = 0, DateTime lookupdate = DateTime.Now, bool Straightlookup = false)
+    public char GetChar(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
     {
         var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
         if (value == null)
@@ -422,7 +422,7 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a bool, or false if the key does not exist or the value is not a bool.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a bool.</exception>
-    public bool GetBool(string key, int iterationsAgo = 0, DateTime lookupdate = DateTime.Now, bool Straightlookup = false)
+    public bool GetBool(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
     {
         var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
         if (value == null)
@@ -440,8 +440,12 @@ public class KeyValueStore
     }
 
 
-    private List<string> Checkkeys(string key, int iterationsAgo = 0, DateTime lookupdate = DateTime.Now)
+    private List<string> Checkkeys(string key, int iterationsAgo = 0, DateTime lookupdate = default)
     {
+        if (lookupdate == default)
+        {
+            lookupdate = DateTime.Now;
+        }
         int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
         List<string> keyNames = new List<string>();
 
