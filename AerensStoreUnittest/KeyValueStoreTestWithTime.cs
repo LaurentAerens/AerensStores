@@ -75,6 +75,46 @@ namespace AerensStoreTest
             Assert.That(result, Is.Null);
         }
         [Test]
+        public void Get_KeyFromNonExistingDateWithLookupdate_ReturnsNull()
+        {
+            string date = _now.AddYears(-5).ToString("yyyy");
+            DateTime getDate = _now;
+            string value = "testValue";
+            CreateNewStore(date, value, path, new DeltaTime(years: 3));
+            var result = _store.Get(testKey, lookupdate: getDate);
+            Assert.That(result, Is.Null);
+        }
+        [Test]
+        public void Get_OldKeyWithLookupdate_ReturnsValue()
+        {
+            string date = _now.AddYears(-5).ToString("yyyy");
+            DateTime getDate = _now.AddYears(-5).AddMonths(2);
+            string value = "testValue";
+            CreateNewStore(date, value, path, new DeltaTime(years: 1));
+            var result = _store.Get(testKey, lookupdate: getDate);
+            Assert.That(result, Is.EqualTo(value));
+        }
+        [Test]
+        public void Get_KeyFromNonExistingDateWithStraightlookup_ReturnsNull()
+        {
+            string date = _now.AddYears(-5).ToString("yyyy");
+            string value = "testValue";
+            CreateNewStore(date, value, path, new DeltaTime(years: 3));
+            string straightKey = testKey + _now.ToString("yyyy");
+            var result = _store.Get(straightKey, Straightlookup: true);
+            Assert.That(result, Is.Null);
+        }
+        [Test]
+        public void Get_OldKeyStraightlookup_ReturnsValue()
+        {
+            string date = _now.AddYears(-5).ToString("yyyy");
+            string value = "testValue";
+            CreateNewStore(date, value, path, new DeltaTime(years: 1));
+            string straightKey = testKey + date;
+            var result = _store.Get(straightKey, Straightlookup: true);
+            Assert.That(result, Is.EqualTo(value));
+        }
+        [Test]
         public void Set_OverwritesKeyWithinDeltaTimeMonth_SetsValueForKey()
         {
             string date = _now.AddMonths(-1).ToString("yyyyMM");
