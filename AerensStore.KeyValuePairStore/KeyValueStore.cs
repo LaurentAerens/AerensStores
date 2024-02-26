@@ -211,9 +211,9 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a string, or empty string if the key does not exist or the value is not a string.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a string.</exception>
-    public string GetString(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
+    public string GetString(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return string.Empty;
@@ -251,9 +251,9 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a integer, or 0 if the key does not exist or the value is not a integer.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a integer.</exception>
-    public int GetInt(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
+    public int GetInt(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return 0;
@@ -303,9 +303,9 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a double, or 0 if the key does not exist or the value is not a double.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a double.</exception>
-    public double GetDouble(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
+    public double GetDouble(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return 0;
@@ -343,9 +343,9 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a long, or 0 if the key does not exist or the value is not a long.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a long.</exception>
-    public long GetLong(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
+    public long GetLong(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return 0;
@@ -383,9 +383,9 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a char, or '\0' if the key does not exist or the value is not a char.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a char.</exception>
-    public char GetChar(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
+    public char GetChar(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return '\0';
@@ -438,9 +438,9 @@ public class KeyValueStore
     /// <returns>The value associated with the specified key as a bool, or false if the key does not exist or the value is not a bool.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a bool.</exception>
-    public bool GetBool(string key, int iterationsAgo = 0, DateTime lookupdate = default, bool Straightlookup = false)
+    public bool GetBool(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupdate, Straightlookup);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return false;
@@ -456,11 +456,11 @@ public class KeyValueStore
     }
 
 
-    private List<string> Checkkeys(string key, int iterationsAgo = 0, DateTime lookupdate = default)
+    private List<string> Checkkeys(string key, int iterationsAgo = 0, DateTime lookupDate = default)
     {
-        if (lookupdate == default)
+        if (lookupDate == default)
         {
-            lookupdate = DateTime.Now;
+            lookupDate = DateTime.Now;
         }
         int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
         List<string> keyNames = new List<string>();
@@ -470,28 +470,28 @@ public class KeyValueStore
         {
             for (int i = 0; i < timeToKeep[0]; i++)
             {
-                keyNames.Add(key + lookupdate.AddHours(-i - iterationsAgo * timeToKeep[0]).ToString("yyyyMMDDHH"));
+                keyNames.Add(key + lookupDate.AddHours(-i - iterationsAgo * timeToKeep[0]).ToString("yyyyMMDDHH"));
             }
         }
         else if (timeToKeep[1] != 0)
         {
             for (int i = 0; i < timeToKeep[1]; i++)
             {
-                keyNames.Add(key + lookupdate.AddDays(-i - iterationsAgo * timeToKeep[1]).ToString("yyyyMMDD"));
+                keyNames.Add(key + lookupDate.AddDays(-i - iterationsAgo * timeToKeep[1]).ToString("yyyyMMDD"));
             }
         }
         else if (timeToKeep[2] != 0)
         {
             for (int i = 0; i < timeToKeep[2]; i++)
             {
-                keyNames.Add(key + lookupdate.AddMonths(-i - iterationsAgo * timeToKeep[2]).ToString("yyyyMM"));
+                keyNames.Add(key + lookupDate.AddMonths(-i - iterationsAgo * timeToKeep[2]).ToString("yyyyMM"));
             }
         }
         else if (timeToKeep[3] != 0)
         {
             for (int i = 0; i < timeToKeep[3]; i++)
             {
-                keyNames.Add(key + lookupdate.AddYears(-i - iterationsAgo * timeToKeep[3]).ToString("yyyy"));
+                keyNames.Add(key + lookupDate.AddYears(-i - iterationsAgo * timeToKeep[3]).ToString("yyyy"));
             }
         }
         else

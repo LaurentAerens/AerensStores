@@ -101,7 +101,7 @@ namespace AerensStoreTest
             string value = "testValue";
             CreateNewStore(date, value, path, new DeltaTime(years: 3));
             string straightKey = testKey + _now.ToString("yyyy");
-            var result = _store.Get(straightKey, Straightlookup: true);
+            var result = _store.Get(straightKey, StraightLookup: true);
             Assert.That(result, Is.Null);
         }
         [Test]
@@ -111,7 +111,7 @@ namespace AerensStoreTest
             string value = "testValue";
             CreateNewStore(date, value, path, new DeltaTime(years: 1));
             string straightKey = testKey + date;
-            var result = _store.Get(straightKey, Straightlookup: true);
+            var result = _store.Get(straightKey, StraightLookup: true);
             Assert.That(result, Is.EqualTo(value));
         }
         [Test]
