@@ -12,12 +12,12 @@ public class KeyValueStore
     int cleanUpTime;
 
 
-    /// <summary>
     /// Represents a key-value store that persists data to a file.
     /// </summary>
-    /// <param name="filePath">The path to the file where the data is stored. If null, a default file path will be used.</param>
-    /// <param name="continuesStoreTime">The delta time for continuous storage. If null there will be no date based storage and no cleanup</param>
-    /// <param name="cleanUpTime">The clean-up time in x * set DeltaTimes. If 0 and continuous storage is set to 3 months, a default clean-up time of 3 months will be used. So anything older then 5 months will be deleted</param>
+    /// <param name="filePath">The path to the file where the data is stored. If not provided, a default file path will be used.</param>
+    /// <param name="continuesStoreTime">The time interval for continuous data storage. If not provided, a default value will be used.</param>
+    /// <param name="cleanUpTime">The time interval for cleaning up old data. If not provided, a default value will be used.</param>
+    /// <param name="OverwriteSetting">A flag indicating whether to overwrite the existing settings in the store. If set to false, the settings in the store will be compared with the provided values.</param>
     public KeyValueStore(string filePath = null, DeltaTime continuesStoreTime = null, int cleanUpTime = 0, bool OverwriteSetting = false)
     {
         bool MissmatchSettings = false;
@@ -152,22 +152,27 @@ public class KeyValueStore
     }
 
     /// <summary>
-    /// Retrieves the value associated with the specified key.
+    /// Retrieves the value associated with the specified key from the key-value store.
     /// </summary>
     /// <param name="key">The key of the value to retrieve.</param>
-    /// <returns>The value associated with the specified key, or null if the key is not found.</returns>
-    public object Get(string key, int iterationsAgo = 0)
+    /// <param name="iterationsAgo">The number of iterations ago to search for the key.</param>
+    /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
+    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
+    /// <returns>
+    /// The value associated with the specified key, or null if the key is not found.
+    /// </returns>
+    public object Get(string key, int iterationsAgo = 0 , DateTime lookupDate = default, bool StraightLookup = false)
     {
         try
         {
             object result = null;
-            if (ContinuesStoreTime.IsOff)
+            if (ContinuesStoreTime.IsOff || StraightLookup)
             {
                 return store[key];
             }
             else
             {
-                List<string> keyNames = Checkkeys(key, iterationsAgo);
+                List<string> keyNames = Checkkeys(key, iterationsAgo, lookupDate);
                 foreach (string keyName in keyNames)
                 {
                     if (store.ContainsKey(keyName))
@@ -182,7 +187,6 @@ public class KeyValueStore
         {
             return null;
         }
-
     }
 
     /// <summary>
@@ -202,12 +206,14 @@ public class KeyValueStore
     /// The number of iterations ago to get the value from. This is multiplied by DeltaTime to calculate the actual time ago.
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning empty string.
     /// </param>
+    ///<param name="lookupDate">The lookup date get the keyValue on a certain date</param>
+    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a string, or empty string if the key does not exist or the value is not a string.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a string.</exception>
-    public string GetString(string key, int iterationsAgo = 0)
+    public string GetString(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return string.Empty;
@@ -240,12 +246,14 @@ public class KeyValueStore
     /// The number of iterations ago to get the value from. This is multiplied by DeltaTime to calculate the actual time ago.
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning 0.
     /// </param>
+    /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
+    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a integer, or 0 if the key does not exist or the value is not a integer.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a integer.</exception>
-    public int GetInt(string key, int iterationsAgo = 0)
+    public int GetInt(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return 0;
@@ -290,12 +298,14 @@ public class KeyValueStore
     /// The number of iterations ago to get the value from. This is multiplied by DeltaTime to calculate the actual time ago.
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning 0.
     /// </param>
+    /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
+    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a double, or 0 if the key does not exist or the value is not a double.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a double.</exception>
-    public double GetDouble(string key, int iterationsAgo = 0)
+    public double GetDouble(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return 0;
@@ -328,12 +338,14 @@ public class KeyValueStore
     /// The number of iterations ago to get the value from. This is multiplied by DeltaTime to calculate the actual time ago.
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning 0.
     /// </param>
+    /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
+    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a long, or 0 if the key does not exist or the value is not a long.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a long.</exception>
-    public long GetLong(string key, int iterationsAgo = 0)
+    public long GetLong(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return 0;
@@ -366,12 +378,14 @@ public class KeyValueStore
     /// The number of iterations ago to get the value from. This is multiplied by DeltaTime to calculate the actual time ago.
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning '\0'.
     /// </param>
+    /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
+    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a char, or '\0' if the key does not exist or the value is not a char.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a char.</exception>
-    public char GetChar(string key, int iterationsAgo = 0)
+    public char GetChar(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return '\0';
@@ -419,12 +433,14 @@ public class KeyValueStore
     /// The number of iterations ago to get the value from. This is multiplied by DeltaTime to calculate the actual time ago.
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning false.
     /// </param>
+    /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
+    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a bool, or false if the key does not exist or the value is not a bool.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a bool.</exception>
-    public bool GetBool(string key, int iterationsAgo = 0)
+    public bool GetBool(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
-        var value = Get(key, iterationsAgo);
+        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
         if (value == null)
         {
             return false;
@@ -440,8 +456,12 @@ public class KeyValueStore
     }
 
 
-    private List<string> Checkkeys(string key, int iterationsAgo = 0)
+    private List<string> Checkkeys(string key, int iterationsAgo = 0, DateTime lookupDate = default)
     {
+        if (lookupDate == default)
+        {
+            lookupDate = DateTime.Now;
+        }
         int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
         List<string> keyNames = new List<string>();
 
@@ -450,28 +470,28 @@ public class KeyValueStore
         {
             for (int i = 0; i < timeToKeep[0]; i++)
             {
-                keyNames.Add(key + DateTime.Now.AddHours(-i - iterationsAgo * timeToKeep[0]).ToString("yyyyMMDDHH"));
+                keyNames.Add(key + lookupDate.AddHours(-i - iterationsAgo * timeToKeep[0]).ToString("yyyyMMDDHH"));
             }
         }
         else if (timeToKeep[1] != 0)
         {
             for (int i = 0; i < timeToKeep[1]; i++)
             {
-                keyNames.Add(key + DateTime.Now.AddDays(-i - iterationsAgo * timeToKeep[1]).ToString("yyyyMMDD"));
+                keyNames.Add(key + lookupDate.AddDays(-i - iterationsAgo * timeToKeep[1]).ToString("yyyyMMDD"));
             }
         }
         else if (timeToKeep[2] != 0)
         {
             for (int i = 0; i < timeToKeep[2]; i++)
             {
-                keyNames.Add(key + DateTime.Now.AddMonths(-i - iterationsAgo * timeToKeep[2]).ToString("yyyyMM"));
+                keyNames.Add(key + lookupDate.AddMonths(-i - iterationsAgo * timeToKeep[2]).ToString("yyyyMM"));
             }
         }
         else if (timeToKeep[3] != 0)
         {
             for (int i = 0; i < timeToKeep[3]; i++)
             {
-                keyNames.Add(key + DateTime.Now.AddYears(-i - iterationsAgo * timeToKeep[3]).ToString("yyyy"));
+                keyNames.Add(key + lookupDate.AddYears(-i - iterationsAgo * timeToKeep[3]).ToString("yyyy"));
             }
         }
         else
