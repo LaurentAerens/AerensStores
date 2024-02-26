@@ -81,7 +81,7 @@ namespace AerensStoreTest
             DateTime getDate = _now;
             string value = "testValue";
             CreateNewStore(date, value, path, new DeltaTime(years: 3));
-            var result = _store.Get(testKey, lookupdate: getDate);
+            var result = _store.Get(testKey, lookupDate: getDate);
             Assert.That(result, Is.Null);
         }
         [Test]
@@ -91,7 +91,7 @@ namespace AerensStoreTest
             DateTime getDate = _now.AddYears(-5).AddMonths(2);
             string value = "testValue";
             CreateNewStore(date, value, path, new DeltaTime(years: 1));
-            var result = _store.Get(testKey, lookupdate: getDate);
+            var result = _store.Get(testKey, lookupDate: getDate);
             Assert.That(result, Is.EqualTo(value));
         }
         [Test]
