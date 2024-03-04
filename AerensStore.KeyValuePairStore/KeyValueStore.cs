@@ -45,7 +45,7 @@ public class KeyValueStore
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(settingsjson);
             var storejson = JsonConvert.SerializeObject(data["Store"]);
             store = JsonConvert.DeserializeObject<Dictionary<string, object>>(storejson);
-            if (!OverwriteSetting) 
+            if (!OverwriteSetting)
             {
                 if (settings.ContainsKey("ContinuesStoreTime") && settings.ContainsKey("cleanUpTime"))
                 {
@@ -122,6 +122,186 @@ public class KeyValueStore
     }
 
     /// <summary>
+    /// Retrieves the keys from the key-value store.
+    /// </summary>
+    /// <param name="WithDateTime">Indicates whether to include the date and time in the keys.</param>
+    /// <returns>A list of keys.</returns>
+    public List<string> GetKeys(bool WithDateTime = false)
+    {
+        int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
+        if (WithDateTime)
+        {
+            return store.Keys.ToList();
+        }
+        else
+        {
+            List<string> keys = new List<string>();
+
+            if (timeToKeep[0] != 0)
+            {
+                foreach (string key in store.Keys)
+                {
+                    keys.Add(key.Substring(0, key.Length - 10));
+                }
+            }
+            else if (timeToKeep[1] != 0)
+            {
+                foreach (string key in store.Keys)
+                {
+                    keys.Add(key.Substring(0, key.Length - 8));
+                }
+            }
+            else if (timeToKeep[2] != 0)
+            {
+                foreach (string key in store.Keys)
+                {
+                    keys.Add(key.Substring(0, key.Length - 6));
+                }
+            }
+            else if (timeToKeep[3] != 0)
+            {
+                foreach (string key in store.Keys)
+                {
+                    keys.Add(key.Substring(0, key.Length - 4));
+                }
+            }
+            else
+            {
+                keys = store.Keys.ToList();
+            }
+
+            return keys;
+        }
+
+    }
+
+    /// <summary>
+    /// Retrieves the entire key-value store.
+    /// </summary>
+    /// <returns>The key-value store as a dictionary.</returns>
+    public Dictionary<string, object> GetStore()
+    {
+        return store;
+    }
+    
+    /// <summary>
+    /// Retrieves the settings of the key-value store.
+    /// </summary>
+    /// <returns>A dictionary containing the settings.</returns>
+    public Dictionary<string, object> getSettings()
+    {
+        var settings = new Dictionary<string, object>
+        {
+            { "ContinuesStoreTime", ContinuesStoreTime },
+            { "cleanUpTime", cleanUpTime }
+        };
+        return settings;
+    }
+
+    /// <summary>
+    /// Retrieves the versions of keys that match the specified key name.
+    /// </summary>
+    /// <param name="keyName">The name of the key.</param>
+    /// <returns>A dictionary containing Iterations and Date for the key.</returns>
+    public Dictionary<int, string> GetKeyVersions(string keyName)
+    {
+        Dictionary<int, string> keyVersions = new Dictionary<int, string>();
+        int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
+        foreach (string key in store.Keys)
+        {
+            if (key.StartsWith(keyName) && !key.Equals(keyName))
+            {
+                if (timeToKeep[0] != 0)
+                {
+                    string suffix = key.Substring(key.Length - 10);
+                    keyVersions.Add(GetIterationBack(suffix), suffix);
+                }
+                else if (timeToKeep[1] != 0)
+                {
+                    string suffix = key.Substring(key.Length - 8);
+                    keyVersions.Add(GetIterationBack(suffix), suffix);
+                }
+                else if (timeToKeep[2] != 0)
+                {
+                    string suffix = key.Substring(key.Length - 6);
+                    keyVersions.Add(GetIterationBack(suffix), suffix);
+                }
+                else if (timeToKeep[3] != 0)
+                {
+                    string suffix = key.Substring(key.Length - 4);
+                    keyVersions.Add(GetIterationBack(suffix), suffix);
+                }
+
+            }
+        }
+        keyVersions = keyVersions.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+        return keyVersions;
+    }
+
+    /// <summary>
+    /// Retrieves the keys and their corresponding versions from the store.
+    /// </summary>
+    /// <returns>A dictionary containing the keys and their versions.</returns>
+    public Dictionary<string, List<string>> GetKeysVersions()
+    {
+        int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
+        Dictionary<string, List<string>> keyVersions = new Dictionary<string, List<string>>();
+        if (timeToKeep[0] != 0)
+        {
+           foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 10);
+                string keySuffix = key.Substring(key.Length - 10);
+                if (!keyVersions.ContainsKey(keyName))
+                {
+                    keyVersions[keyName] = new List<string>();
+                }
+                keyVersions[keyName].Add(keySuffix);
+            }
+        }
+        else if (timeToKeep[1] != 0)
+        {
+           foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 8);
+                string keySuffix = key.Substring(key.Length - 8);
+                if (!keyVersions.ContainsKey(keyName))
+                {
+                    keyVersions[keyName] = new List<string>();
+                }
+                keyVersions[keyName].Add(keySuffix);
+            }
+        }
+        else if (timeToKeep[2] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 6);
+                string keySuffix = key.Substring(key.Length - 6);
+                if (!keyVersions.ContainsKey(keyName))
+                {
+                    keyVersions[keyName] = new List<string>();
+                }
+                keyVersions[keyName].Add(keySuffix);
+            }           
+        }
+        else if (timeToKeep[3] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 4);
+                string keySuffix = key.Substring(key.Length - 4);
+                if (!keyVersions.ContainsKey(keyName))
+                {
+                    keyVersions[keyName] = new List<string>();
+                }
+                keyVersions[keyName].Add(keySuffix);
+            }
+        }
+        return keyVersions;
+    }
+
+    /// <summary>
     /// Sets the value associated with the specified key in the key-value store.
     /// If ContinuesStoreTime is off, the value is directly stored in the store and saved.
     /// If ContinuesStoreTime is on, We update the key or make a new one if that is needed.
@@ -161,7 +341,7 @@ public class KeyValueStore
     /// <returns>
     /// The value associated with the specified key, or null if the key is not found.
     /// </returns>
-    public object Get(string key, int iterationsAgo = 0 , DateTime lookupDate = default, bool StraightLookup = false)
+    public object Get(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
     {
         try
         {
@@ -274,9 +454,9 @@ public class KeyValueStore
             }
             catch (FormatException)
             {
-                throw new InvalidCastException($"The value for key '{key}' is not of type 'int'."); 
+                throw new InvalidCastException($"The value for key '{key}' is not of type 'int'.");
             }
-            
+
         }
     }
 
@@ -529,6 +709,35 @@ public class KeyValueStore
         }
 
         return keyName;
+    }
+    private int GetIterationBack(string suffix)
+    {
+        int keyDate = int.Parse(suffix);
+        int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
+        if (timeToKeep[0] != 0)
+        {
+            int currentDate = int.Parse(DateTime.Now.ToString("yyyyMMDDHH"));
+            return (currentDate - keyDate) / timeToKeep[0];
+        }
+        else if (timeToKeep[1] != 0)
+        {
+            int currentDate = int.Parse(DateTime.Now.ToString("yyyyMMDD"));
+            return (currentDate - keyDate) / timeToKeep[1];
+        }
+        else if (timeToKeep[2] != 0)
+        {
+            int currentDate = int.Parse(DateTime.Now.ToString("yyyyMM"));
+            return (currentDate - keyDate) / timeToKeep[2];
+        }
+        else if (timeToKeep[3] != 0)
+        {
+            int currentDate = int.Parse(DateTime.Now.ToString("yyyy"));
+            return (currentDate - keyDate) / timeToKeep[3];
+        }
+        else
+        {
+            return 0;
+        }
     }
     // cleanup stuff
     private void RemoveOldKeys()
