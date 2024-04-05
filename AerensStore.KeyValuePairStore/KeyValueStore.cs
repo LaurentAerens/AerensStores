@@ -141,28 +141,56 @@ public class KeyValueStore
             {
                 foreach (string key in store.Keys)
                 {
-                    keys.Add(key.Substring(0, key.Length - 10));
+                    if (int.TryParse(key.Substring(key.Length - 10), out _))
+                    {
+                        keys.Add(key.Substring(0, key.Length - 10));
+                    }
+                    else
+                    {
+                        keys.Add(key);
+                    }
                 }
             }
             else if (timeToKeep[1] != 0)
             {
                 foreach (string key in store.Keys)
                 {
-                    keys.Add(key.Substring(0, key.Length - 8));
+                    if (int.TryParse(key.Substring(key.Length - 8), out _))
+                    {
+                        keys.Add(key.Substring(0, key.Length - 8));
+                    }
+                    else
+                    {
+                        keys.Add(key);
+                    }
                 }
             }
             else if (timeToKeep[2] != 0)
             {
                 foreach (string key in store.Keys)
                 {
-                    keys.Add(key.Substring(0, key.Length - 6));
+                    if (int.TryParse(key.Substring(key.Length - 6), out _))
+                    {
+                        keys.Add(key.Substring(0, key.Length - 6));
+                    }
+                    else
+                    {
+                        keys.Add(key);
+                    }
                 }
             }
             else if (timeToKeep[3] != 0)
             {
                 foreach (string key in store.Keys)
                 {
-                    keys.Add(key.Substring(0, key.Length - 4));
+                    if (int.TryParse(key.Substring(key.Length - 4), out _))
+                    {
+                        keys.Add(key.Substring(0, key.Length - 4));
+                    }
+                    else
+                    {
+                        keys.Add(key);
+                    }
                 }
             }
             else
@@ -188,14 +216,22 @@ public class KeyValueStore
     /// Retrieves the settings of the key-value store.
     /// </summary>
     /// <returns>A dictionary containing the settings.</returns>
-    public Dictionary<string, object> getSettings()
+    public Dictionary<string, object> GetSettings()
     {
-        var settings = new Dictionary<string, object>
+        if (ContinuesStoreTime.IsOff)
         {
-            { "ContinuesStoreTime", ContinuesStoreTime },
-            { "cleanUpTime", cleanUpTime }
-        };
-        return settings;
+            return null;
+        }
+        else
+        {
+            var settings = new Dictionary<string, object>
+            {
+                { "ContinuesStoreTime", ContinuesStoreTime },
+                { "cleanUpTime", cleanUpTime }
+            };
+            return settings;
+        }
+
     }
 
     /// <summary>
@@ -218,22 +254,50 @@ public class KeyValueStore
                 if (timeToKeep[0] != 0)
                 {
                     string suffix = key.Substring(key.Length - 10);
-                    keyVersions.Add(GetIterationBack(suffix), suffix);
+                    if (int.TryParse(suffix, out int iteration))
+                    {
+                        keyVersions.Add(GetIterationBack(suffix), suffix);
+                    }
+                    else
+                    {
+                        return keyVersions;
+                    }
                 }
                 else if (timeToKeep[1] != 0)
                 {
                     string suffix = key.Substring(key.Length - 8);
-                    keyVersions.Add(GetIterationBack(suffix), suffix);
+                    if (int.TryParse(suffix, out int iteration))
+                    {
+                        keyVersions.Add(GetIterationBack(suffix), suffix);
+                    }
+                    else
+                    {
+                        return keyVersions;
+                    }
                 }
                 else if (timeToKeep[2] != 0)
                 {
                     string suffix = key.Substring(key.Length - 6);
-                    keyVersions.Add(GetIterationBack(suffix), suffix);
+                    if (int.TryParse(suffix, out int iteration))
+                    {
+                        keyVersions.Add(GetIterationBack(suffix), suffix);
+                    }
+                    else
+                    {
+                        return keyVersions;
+                    }
                 }
                 else if (timeToKeep[3] != 0)
                 {
                     string suffix = key.Substring(key.Length - 4);
-                    keyVersions.Add(GetIterationBack(suffix), suffix);
+                    if (int.TryParse(suffix, out int iteration))
+                    {
+                        keyVersions.Add(GetIterationBack(suffix), suffix);
+                    }
+                    else
+                    {
+                        return keyVersions;
+                    }
                 }
 
             }
@@ -261,10 +325,18 @@ public class KeyValueStore
         Dictionary<string, List<string>> keyVersions = new Dictionary<string, List<string>>();
         if (timeToKeep[0] != 0)
         {
-           foreach (string key in store.Keys)
+            foreach (string key in store.Keys)
             {
                 string keyName = key.Substring(0, key.Length - 10);
                 string keySuffix = key.Substring(key.Length - 10);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyVersions.ContainsKey(key))
+                    {
+                        keyVersions[key] = new List<string>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
                 if (!keyVersions.ContainsKey(keyName))
                 {
                     keyVersions[keyName] = new List<string>();
@@ -274,10 +346,18 @@ public class KeyValueStore
         }
         else if (timeToKeep[1] != 0)
         {
-           foreach (string key in store.Keys)
+            foreach (string key in store.Keys)
             {
                 string keyName = key.Substring(0, key.Length - 8);
                 string keySuffix = key.Substring(key.Length - 8);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyVersions.ContainsKey(key))
+                    {
+                        keyVersions[key] = new List<string>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
                 if (!keyVersions.ContainsKey(keyName))
                 {
                     keyVersions[keyName] = new List<string>();
@@ -291,6 +371,14 @@ public class KeyValueStore
             {
                 string keyName = key.Substring(0, key.Length - 6);
                 string keySuffix = key.Substring(key.Length - 6);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyVersions.ContainsKey(key))
+                    {
+                        keyVersions[key] = new List<string>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
                 if (!keyVersions.ContainsKey(keyName))
                 {
                     keyVersions[keyName] = new List<string>();
@@ -304,6 +392,14 @@ public class KeyValueStore
             {
                 string keyName = key.Substring(0, key.Length - 4);
                 string keySuffix = key.Substring(key.Length - 4);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyVersions.ContainsKey(key))
+                    {
+                        keyVersions[key] = new List<string>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
                 if (!keyVersions.ContainsKey(keyName))
                 {
                     keyVersions[keyName] = new List<string>();
@@ -313,6 +409,108 @@ public class KeyValueStore
         }
         return keyVersions;
     }
+    /// <summary>
+    /// Retrieves the keys and their corresponding iterations based on the time values set for the store.
+    /// </summary>
+    /// <returns>A dictionary containing the keys and their iterations.</returns>
+    public Dictionary<string, List<int>> GetKeysIterations()
+    {
+        if(ContinuesStoreTime.IsOff)
+        {
+            return null;
+        }
+        Dictionary<string, List<int>> keyIterations = new Dictionary<string, List<int>>();
+        int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
+        if (timeToKeep[0] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 10);
+                string keySuffix = key.Substring(key.Length - 10);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyIterations.ContainsKey(key))
+                    {
+                        keyIterations[key] = new List<int>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyIterations.ContainsKey(keyName))
+                {
+                    keyIterations[keyName] = new List<int>();
+                }
+                int iteration = GetIterationBack(keySuffix);
+                keyIterations[keyName].Add(iteration);
+            }
+        }
+        else if (timeToKeep[1] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 8);
+                string keySuffix = key.Substring(key.Length - 8);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyIterations.ContainsKey(key))
+                    {
+                        keyIterations[key] = new List<int>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyIterations.ContainsKey(keyName))
+                {
+                    keyIterations[keyName] = new List<int>();
+                }
+                int iteration = GetIterationBack(keySuffix);
+                keyIterations[keyName].Add(iteration);
+            }
+        }
+        else if (timeToKeep[2] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 6);
+                string keySuffix = key.Substring(key.Length - 6);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyIterations.ContainsKey(key))
+                    {
+                        keyIterations[key] = new List<int>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyIterations.ContainsKey(keyName))
+                {
+                    keyIterations[keyName] = new List<int>();
+                }
+                int iteration = GetIterationBack(keySuffix);
+                keyIterations[keyName].Add(iteration);
+            }
+        }
+        else if (timeToKeep[3] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 4);
+                string keySuffix = key.Substring(key.Length - 4);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyIterations.ContainsKey(key))
+                    {
+                        keyIterations[key] = new List<int>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyIterations.ContainsKey(keyName))
+                {
+                    keyIterations[keyName] = new List<int>();
+                }
+                int iteration = GetIterationBack(keySuffix);
+                keyIterations[keyName].Add(iteration);
+            }
+        }
+        return keyIterations;
+    }
 
     /// <summary>
     /// Sets the value associated with the specified key in the key-value store.
@@ -321,10 +519,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to associate the value with.</param>
     /// <param name="value">The value to be stored.</param>
-    /// <param name="straightText">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
-    public void Set(string key, object value, bool straightText = false)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void Set(string key, object value, bool straightKey = false)
     {
-        if (ContinuesStoreTime.IsOff || straightText)
+        if (ContinuesStoreTime.IsOff || straightKey)
         {
             store[key] = value;
             Save();
@@ -388,10 +586,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The value to set.</param>
-    /// <param name="straightText">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
-    public void SetString(string key, string value, bool straightText = false)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetString(string key, string value, bool straightKey = false)
     {
-        Set(key, value, straightText);
+        Set(key, value, straightKey);
     }
     /// <summary>
     /// Retrieves the value associated with the specified key as a string.
@@ -428,10 +626,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The integer value to set.</param>
-    /// <param name="straightText">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
-    public void SetInt(string key, int value, bool straightText = false)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetInt(string key, int value, bool straightKey = false)
     {
-        Set(key, value, straightText);
+        Set(key, value, straightKey);
     }
 
     /// <summary>
@@ -481,10 +679,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The double value to set.</param>
-    /// <param name="straightText">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
-    public void SetDouble(string key, double value, bool straightText = false)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetDouble(string key, double value, bool straightKey = false)
     {
-        Set(key, value, straightText);
+        Set(key, value, straightKey);
     }
 
     /// <summary>
@@ -522,10 +720,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The long value to set.</param>
-    /// <param name="straightText">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
-    public void SetLong(string key, long value, bool straightText = false)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetLong(string key, long value, bool straightKey = false)
     {
-        Set(key, value, );
+        Set(key, value, straightKey);
     }
 
     /// <summary>
@@ -563,10 +761,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The char value to set.</param>
-    /// <param name="straightText">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
-    public void SetChar(string key, char value, bool straightText = false)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetChar(string key, char value, bool straightKey = false)
     {
-        Set(key, value, straightText);
+        Set(key, value, straightKey);
     }
 
     /// <summary>
@@ -619,10 +817,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The bool value to set.</param>
-    /// <param name="straightText">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
-    public void SetBool(string key, bool value, bool straightText = false)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetBool(string key, bool value, bool straightKey = false)
     {
-        Set(key, value, straightText);
+        Set(key, value, straightKey);
     }
 
     /// <summary>
