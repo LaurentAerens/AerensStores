@@ -297,5 +297,109 @@ namespace AerensStoreTest
 
             Assert.That(_store.GetInt("testKey"), Is.EqualTo(123));
         }
+
+        [Test]
+        public void GetKeys_WithDateTimeFalse_ReturnsAllKeys()
+        {
+            _store.Set("key1", "value1");
+            _store.Set("key2", "value2");
+            _store.Set("key3", "value3");
+
+            List<string> keys = _store.GetKeys(false);
+
+            Assert.That(3, Is.EqualTo(keys.Count));
+            Assert.That(keys, Contains.Item("key1"));
+            Assert.That(keys, Contains.Item("key2"));
+            Assert.That(keys, Contains.Item("key3"));
+        }
+
+        [Test]
+        public void GetKeys_WithDateTimeTrue_ReturnsAllKeys()
+        {
+            _store.Set("key1", "value1");
+            _store.Set("key2", "value2");
+            _store.Set("key3", "value3");
+
+            List<string> keys = _store.GetKeys(true);
+
+            Assert.That(3, Is.EqualTo(keys.Count));
+            Assert.That(keys, Contains.Item("key1"));
+            Assert.That(keys, Contains.Item("key2"));
+            Assert.That(keys, Contains.Item("key3"));
+        }
+
+        [Test]
+        public void GetKeys_WithDateTimeFalse_ReturnsAllKeys_RecreatedStore()
+        {
+            _store.Set("key1", "value1");
+            _store.Set("key2", "value2");
+            _store.Set("key3", "value3");
+
+            _store = null;
+            _store = new KeyValueStore(_filePath);
+            List<string> keys = _store.GetKeys(false);
+
+            Assert.That(3, Is.EqualTo(keys.Count));
+            Assert.That(keys, Contains.Item("key1"));
+            Assert.That(keys, Contains.Item("key2"));
+            Assert.That(keys, Contains.Item("key3"));
+        }
+
+        [Test]
+        public void GetStore_ReturnsNonNullDictionary()
+        {
+            Dictionary<string, object> result = _store.GetStore();
+
+            Assert.That(result, Is.Not.Null);
+        }
+
+        [Test]
+        public void GetStore_ReturnsDictionaryWithCorrectData()
+        {
+            _store.Set("key1", "value1");
+            _store.Set("key2", "value2");
+            _store.Set("key3", "value3");
+
+            Dictionary<string, object> result = _store.GetStore();
+
+            Assert.That(result.Count, Is.EqualTo(3));
+            Assert.That(result["key1"], Is.EqualTo("value1"));
+            Assert.That(result["key2"], Is.EqualTo("value2"));
+            Assert.That(result["key3"], Is.EqualTo("value3"));
+        }
+
+        [Test]
+        public void GetKeyVersions_WhenCalled_WithoutDeltaTime_ReturnsNull()
+        {
+            _store.Set("key1", "value1");
+            Dictionary<int, string> result = new Dictionary<int, string>();
+            result = _store.GetKeyVersions("key1");
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public void GetKeysVersions_WhenCalled_WithoutDeltaTime_ReturnsDictionaryWithKeyAndNull()
+        {
+            _store.Set("key1", "value1");
+            Dictionary<string, List<string>> result = new Dictionary<string, List<string>>();
+            result = _store.GetKeysVersions();
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result["key1"], Is.Null);
+        }
+        [Test]
+        public void GetSettings_WhenCalled_WithoutDeltaTime_ReturnsNull()
+        {
+            var result = _store.GetSettings();
+            Assert.That(result, Is.Null);
+        }
+        [Test]
+        public void GetKeysIterations_WhenCalled_WithoutDeltaTime_ReturnsNull()
+        {
+            _store = null;
+            _store = new KeyValueStore();
+            var result = _store.GetKeysIterations();
+            Assert.That(result, Is.Null);
+        }
     }
 }
