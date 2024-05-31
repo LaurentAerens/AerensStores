@@ -45,7 +45,7 @@ public class KeyValueStore
             var settings = JsonConvert.DeserializeObject<Dictionary<string, object>>(settingsjson);
             var storejson = JsonConvert.SerializeObject(data["Store"]);
             store = JsonConvert.DeserializeObject<Dictionary<string, object>>(storejson);
-            if (!OverwriteSetting) 
+            if (!OverwriteSetting)
             {
                 if (settings.ContainsKey("ContinuesStoreTime") && settings.ContainsKey("cleanUpTime"))
                 {
@@ -92,7 +92,7 @@ public class KeyValueStore
             throw new ArgumentException("The settings in the keyValueStore en the contructor do not match, Constructor onces are taken: This might brake stuff.");
         }
     }
-    public DeltaTime CreateDeltaTimeFromJson(string json)
+    private DeltaTime CreateDeltaTimeFromJson(string json)
     {
         var jObject = JObject.Parse(json);
 
@@ -122,15 +122,407 @@ public class KeyValueStore
     }
 
     /// <summary>
+    /// Retrieves the keys from the key-value store.
+    /// </summary>
+    /// <param name="WithDateTime">Indicates whether to include the date and time in the keys.</param>
+    /// <returns>A list of keys.</returns>
+    public List<string> GetKeys(bool WithDateTime = false)
+    {
+        int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
+        if (WithDateTime || ContinuesStoreTime.IsOff)
+        {
+            return store.Keys.ToList();
+        }
+        else
+        {
+            List<string> keys = new List<string>();
+
+            if (timeToKeep[0] != 0)
+            {
+                foreach (string key in store.Keys)
+                {
+                    if (int.TryParse(key.Substring(key.Length - 10), out _))
+                    {
+                        keys.Add(key.Substring(0, key.Length - 10));
+                    }
+                    else
+                    {
+                        keys.Add(key);
+                    }
+                }
+            }
+            else if (timeToKeep[1] != 0)
+            {
+                foreach (string key in store.Keys)
+                {
+                    if (int.TryParse(key.Substring(key.Length - 8), out _))
+                    {
+                        keys.Add(key.Substring(0, key.Length - 8));
+                    }
+                    else
+                    {
+                        keys.Add(key);
+                    }
+                }
+            }
+            else if (timeToKeep[2] != 0)
+            {
+                foreach (string key in store.Keys)
+                {
+                    if (int.TryParse(key.Substring(key.Length - 6), out _))
+                    {
+                        keys.Add(key.Substring(0, key.Length - 6));
+                    }
+                    else
+                    {
+                        keys.Add(key);
+                    }
+                }
+            }
+            else if (timeToKeep[3] != 0)
+            {
+                foreach (string key in store.Keys)
+                {
+                    if (int.TryParse(key.Substring(key.Length - 4), out _))
+                    {
+                        keys.Add(key.Substring(0, key.Length - 4));
+                    }
+                    else
+                    {
+                        keys.Add(key);
+                    }
+                }
+            }
+            else
+            {
+                keys = store.Keys.ToList();
+            }
+
+            return keys;
+        }
+
+    }
+
+    /// <summary>
+    /// Retrieves the entire key-value store.
+    /// </summary>
+    /// <returns>The key-value store as a dictionary.</returns>
+    public Dictionary<string, object> GetStore()
+    {
+        return store;
+    }
+    
+    /// <summary>
+    /// Retrieves the settings of the key-value store.
+    /// </summary>
+    /// <returns>A dictionary containing the settings.</returns>
+    public Dictionary<string, object> GetSettings()
+    {
+        if (ContinuesStoreTime.IsOff)
+        {
+            return null;
+        }
+        else
+        {
+            var settings = new Dictionary<string, object>
+            {
+                { "ContinuesStoreTime", ContinuesStoreTime },
+                { "cleanUpTime", cleanUpTime }
+            };
+            return settings;
+        }
+
+    }
+
+    /// <summary>
+    /// Retrieves the versions of keys that match the specified key name.
+    /// </summary>
+    /// <param name="keyName">The name of the key.</param>
+    /// <returns>A dictionary containing Iterations and Date for the key.</returns>
+    public Dictionary<int, string> GetKeyVersions(string keyName)
+    {
+        if (ContinuesStoreTime.IsOff)
+        {
+            return null;
+        }
+        Dictionary<int, string> keyVersions = new Dictionary<int, string>();
+        int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
+        foreach (string key in store.Keys)
+        {
+            if (key.StartsWith(keyName) && !key.Equals(keyName))
+            {
+                if (timeToKeep[0] != 0)
+                {
+                    string suffix = key.Substring(key.Length - 10);
+                    if (int.TryParse(suffix, out int iteration))
+                    {
+                        keyVersions.Add(GetIterationBack(suffix), suffix);
+                    }
+                    else
+                    {
+                        return keyVersions;
+                    }
+                }
+                else if (timeToKeep[1] != 0)
+                {
+                    string suffix = key.Substring(key.Length - 8);
+                    if (int.TryParse(suffix, out int iteration))
+                    {
+                        keyVersions.Add(GetIterationBack(suffix), suffix);
+                    }
+                    else
+                    {
+                        return keyVersions;
+                    }
+                }
+                else if (timeToKeep[2] != 0)
+                {
+                    string suffix = key.Substring(key.Length - 6);
+                    if (int.TryParse(suffix, out int iteration))
+                    {
+                        keyVersions.Add(GetIterationBack(suffix), suffix);
+                    }
+                    else
+                    {
+                        return keyVersions;
+                    }
+                }
+                else if (timeToKeep[3] != 0)
+                {
+                    string suffix = key.Substring(key.Length - 4);
+                    if (int.TryParse(suffix, out int iteration))
+                    {
+                        keyVersions.Add(GetIterationBack(suffix), suffix);
+                    }
+                    else
+                    {
+                        return keyVersions;
+                    }
+                }
+
+            }
+        }
+        keyVersions = keyVersions.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+        return keyVersions;
+    }
+
+    /// <summary>
+    /// Retrieves the keys and their corresponding versions from the store.
+    /// </summary>
+    /// <returns>A dictionary containing the keys and their versions.</returns>
+    public Dictionary<string, List<string>> GetKeysVersions()
+    {
+        if (ContinuesStoreTime.IsOff)
+        {
+            Dictionary<string, List<string>> keysNoVersions = new Dictionary<string, List<string>>();
+            foreach (string key in store.Keys)
+            {
+                keysNoVersions[key] = null;
+            }
+            return keysNoVersions;
+        }
+        int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
+        Dictionary<string, List<string>> keyVersions = new Dictionary<string, List<string>>();
+        if (timeToKeep[0] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 10);
+                string keySuffix = key.Substring(key.Length - 10);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyVersions.ContainsKey(key))
+                    {
+                        keyVersions[key] = new List<string>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyVersions.ContainsKey(keyName))
+                {
+                    keyVersions[keyName] = new List<string>();
+                }
+                keyVersions[keyName].Add(keySuffix);
+            }
+        }
+        else if (timeToKeep[1] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 8);
+                string keySuffix = key.Substring(key.Length - 8);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyVersions.ContainsKey(key))
+                    {
+                        keyVersions[key] = new List<string>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyVersions.ContainsKey(keyName))
+                {
+                    keyVersions[keyName] = new List<string>();
+                }
+                keyVersions[keyName].Add(keySuffix);
+            }
+        }
+        else if (timeToKeep[2] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 6);
+                string keySuffix = key.Substring(key.Length - 6);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyVersions.ContainsKey(key))
+                    {
+                        keyVersions[key] = new List<string>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyVersions.ContainsKey(keyName))
+                {
+                    keyVersions[keyName] = new List<string>();
+                }
+                keyVersions[keyName].Add(keySuffix);
+            }           
+        }
+        else if (timeToKeep[3] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 4);
+                string keySuffix = key.Substring(key.Length - 4);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyVersions.ContainsKey(key))
+                    {
+                        keyVersions[key] = new List<string>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyVersions.ContainsKey(keyName))
+                {
+                    keyVersions[keyName] = new List<string>();
+                }
+                keyVersions[keyName].Add(keySuffix);
+            }
+        }
+        return keyVersions;
+    }
+    /// <summary>
+    /// Retrieves the keys and their corresponding iterations based on the time values set for the store.
+    /// </summary>
+    /// <returns>A dictionary containing the keys and their iterations.</returns>
+    public Dictionary<string, List<int>> GetKeysIterations()
+    {
+        if(ContinuesStoreTime.IsOff)
+        {
+            return null;
+        }
+        Dictionary<string, List<int>> keyIterations = new Dictionary<string, List<int>>();
+        int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
+        if (timeToKeep[0] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 10);
+                string keySuffix = key.Substring(key.Length - 10);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyIterations.ContainsKey(key))
+                    {
+                        keyIterations[key] = new List<int>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyIterations.ContainsKey(keyName))
+                {
+                    keyIterations[keyName] = new List<int>();
+                }
+                int iteration = GetIterationBack(keySuffix);
+                keyIterations[keyName].Add(iteration);
+            }
+        }
+        else if (timeToKeep[1] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 8);
+                string keySuffix = key.Substring(key.Length - 8);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyIterations.ContainsKey(key))
+                    {
+                        keyIterations[key] = new List<int>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyIterations.ContainsKey(keyName))
+                {
+                    keyIterations[keyName] = new List<int>();
+                }
+                int iteration = GetIterationBack(keySuffix);
+                keyIterations[keyName].Add(iteration);
+            }
+        }
+        else if (timeToKeep[2] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 6);
+                string keySuffix = key.Substring(key.Length - 6);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyIterations.ContainsKey(key))
+                    {
+                        keyIterations[key] = new List<int>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyIterations.ContainsKey(keyName))
+                {
+                    keyIterations[keyName] = new List<int>();
+                }
+                int iteration = GetIterationBack(keySuffix);
+                keyIterations[keyName].Add(iteration);
+            }
+        }
+        else if (timeToKeep[3] != 0)
+        {
+            foreach (string key in store.Keys)
+            {
+                string keyName = key.Substring(0, key.Length - 4);
+                string keySuffix = key.Substring(key.Length - 4);
+                if (!int.TryParse(keySuffix, out _))
+                {
+                    if (!keyIterations.ContainsKey(key))
+                    {
+                        keyIterations[key] = new List<int>();
+                    }
+                    continue; // Skip the key if keySuffix is not an integer
+                }
+                if (!keyIterations.ContainsKey(keyName))
+                {
+                    keyIterations[keyName] = new List<int>();
+                }
+                int iteration = GetIterationBack(keySuffix);
+                keyIterations[keyName].Add(iteration);
+            }
+        }
+        return keyIterations;
+    }
+
+    /// <summary>
     /// Sets the value associated with the specified key in the key-value store.
     /// If ContinuesStoreTime is off, the value is directly stored in the store and saved.
     /// If ContinuesStoreTime is on, We update the key or make a new one if that is needed.
     /// </summary>
     /// <param name="key">The key to associate the value with.</param>
     /// <param name="value">The value to be stored.</param>
-    public void Set(string key, object value)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void Set(string key, object value, bool straightKey = false)
     {
-        if (ContinuesStoreTime.IsOff)
+        if (ContinuesStoreTime.IsOff || straightKey)
         {
             store[key] = value;
             Save();
@@ -157,16 +549,16 @@ public class KeyValueStore
     /// <param name="key">The key of the value to retrieve.</param>
     /// <param name="iterationsAgo">The number of iterations ago to search for the key.</param>
     /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
-    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
+    /// <param name="straightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>
     /// The value associated with the specified key, or null if the key is not found.
     /// </returns>
-    public object Get(string key, int iterationsAgo = 0 , DateTime lookupDate = default, bool StraightLookup = false)
+    public object Get(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool straightLookup = false)
     {
         try
         {
             object result = null;
-            if (ContinuesStoreTime.IsOff || StraightLookup)
+            if (ContinuesStoreTime.IsOff || straightLookup)
             {
                 return store[key];
             }
@@ -194,9 +586,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The value to set.</param>
-    public void SetString(string key, string value)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetString(string key, string value, bool straightKey = false)
     {
-        Set(key, value);
+        Set(key, value, straightKey);
     }
     /// <summary>
     /// Retrieves the value associated with the specified key as a string.
@@ -207,13 +600,13 @@ public class KeyValueStore
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning empty string.
     /// </param>
     ///<param name="lookupDate">The lookup date get the keyValue on a certain date</param>
-    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
+    /// <param name="straightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a string, or empty string if the key does not exist or the value is not a string.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a string.</exception>
-    public string GetString(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
+    public string GetString(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool straightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
+        var value = Get(key, iterationsAgo, lookupDate, straightLookup);
         if (value == null)
         {
             return string.Empty;
@@ -233,9 +626,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The integer value to set.</param>
-    public void SetInt(string key, int value)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetInt(string key, int value, bool straightKey = false)
     {
-        Set(key, value);
+        Set(key, value, straightKey);
     }
 
     /// <summary>
@@ -247,13 +641,13 @@ public class KeyValueStore
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning 0.
     /// </param>
     /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
-    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
+    /// <param name="straightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a integer, or 0 if the key does not exist or the value is not a integer.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a integer.</exception>
-    public int GetInt(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
+    public int GetInt(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool straightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
+        var value = Get(key, iterationsAgo, lookupDate, straightLookup);
         if (value == null)
         {
             return 0;
@@ -274,9 +668,9 @@ public class KeyValueStore
             }
             catch (FormatException)
             {
-                throw new InvalidCastException($"The value for key '{key}' is not of type 'int'."); 
+                throw new InvalidCastException($"The value for key '{key}' is not of type 'int'.");
             }
-            
+
         }
     }
 
@@ -285,9 +679,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The double value to set.</param>
-    public void SetDouble(string key, double value)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetDouble(string key, double value, bool straightKey = false)
     {
-        Set(key, value);
+        Set(key, value, straightKey);
     }
 
     /// <summary>
@@ -299,13 +694,13 @@ public class KeyValueStore
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning 0.
     /// </param>
     /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
-    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
+    /// <param name="straightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a double, or 0 if the key does not exist or the value is not a double.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a double.</exception>
-    public double GetDouble(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
+    public double GetDouble(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool straightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
+        var value = Get(key, iterationsAgo, lookupDate, straightLookup);
         if (value == null)
         {
             return 0;
@@ -325,9 +720,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The long value to set.</param>
-    public void SetLong(string key, long value)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetLong(string key, long value, bool straightKey = false)
     {
-        Set(key, value);
+        Set(key, value, straightKey);
     }
 
     /// <summary>
@@ -339,13 +735,13 @@ public class KeyValueStore
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning 0.
     /// </param>
     /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
-    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
+    /// <param name="straightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a long, or 0 if the key does not exist or the value is not a long.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a long.</exception>
-    public long GetLong(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
+    public long GetLong(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool straightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
+        var value = Get(key, iterationsAgo, lookupDate, straightLookup);
         if (value == null)
         {
             return 0;
@@ -365,9 +761,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The char value to set.</param>
-    public void SetChar(string key, char value)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetChar(string key, char value, bool straightKey = false)
     {
-        Set(key, value);
+        Set(key, value, straightKey);
     }
 
     /// <summary>
@@ -379,13 +776,13 @@ public class KeyValueStore
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning '\0'.
     /// </param>
     /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
-    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
+    /// <param name="straightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a char, or '\0' if the key does not exist or the value is not a char.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a char.</exception>
-    public char GetChar(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
+    public char GetChar(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool straightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
+        var value = Get(key, iterationsAgo, lookupDate, straightLookup);
         if (value == null)
         {
             return '\0';
@@ -420,9 +817,10 @@ public class KeyValueStore
     /// </summary>
     /// <param name="key">The key to set.</param>
     /// <param name="value">The bool value to set.</param>
-    public void SetBool(string key, bool value)
+    /// <param name="straightKey">A flag that allows you to turn of the keyDeltaTime Proceccing</param>
+    public void SetBool(string key, bool value, bool straightKey = false)
     {
-        Set(key, value);
+        Set(key, value, straightKey);
     }
 
     /// <summary>
@@ -434,13 +832,13 @@ public class KeyValueStore
     /// If the value from the specified number of iterations ago does not exist, an error is thrown instead of returning false.
     /// </param>
     /// <param name="lookupDate">The lookup date get the keyValue on a certain date</param>
-    /// <param name="StraightLookup">Removes all DateTime processing and look the key as is</param>
+    /// <param name="straightLookup">Removes all DateTime processing and look the key as is</param>
     /// <returns>The value associated with the specified key as a bool, or false if the key does not exist or the value is not a bool.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when the key does not exist in the store and iterationsAgo != 0.</exception>
     /// <exception cref="InvalidCastException">Thrown when the value associated with the key is not a bool.</exception>
-    public bool GetBool(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool StraightLookup = false)
+    public bool GetBool(string key, int iterationsAgo = 0, DateTime lookupDate = default, bool straightLookup = false)
     {
-        var value = Get(key, iterationsAgo, lookupDate, StraightLookup);
+        var value = Get(key, iterationsAgo, lookupDate, straightLookup);
         if (value == null)
         {
             return false;
@@ -529,6 +927,35 @@ public class KeyValueStore
         }
 
         return keyName;
+    }
+    private int GetIterationBack(string suffix)
+    {
+        int keyDate = int.Parse(suffix);
+        int[] timeToKeep = ContinuesStoreTime.GetTimeValues();
+        if (timeToKeep[0] != 0)
+        {
+            int currentDate = int.Parse(DateTime.Now.ToString("yyyyMMDDHH"));
+            return (currentDate - keyDate) / timeToKeep[0];
+        }
+        else if (timeToKeep[1] != 0)
+        {
+            int currentDate = int.Parse(DateTime.Now.ToString("yyyyMMDD"));
+            return (currentDate - keyDate) / timeToKeep[1];
+        }
+        else if (timeToKeep[2] != 0)
+        {
+            int currentDate = int.Parse(DateTime.Now.ToString("yyyyMM"));
+            return (currentDate - keyDate) / timeToKeep[2];
+        }
+        else if (timeToKeep[3] != 0)
+        {
+            int currentDate = int.Parse(DateTime.Now.ToString("yyyy"));
+            return (currentDate - keyDate) / timeToKeep[3];
+        }
+        else
+        {
+            return 0;
+        }
     }
     // cleanup stuff
     private void RemoveOldKeys()

@@ -1,12 +1,15 @@
 # AerensStores
 
-AerensStores is a collection of projects that provide various utilities for data storage and manipulation. The solution currently includes the following projects:
+AerensStores is a collection of projects that provide various utilities for data storage and manipulation. The projects in this solution are still under heavy development and once they are stable they will be moved to their own repositories.
+The solution currently includes the following projects:
 
 ## KeyValuePairStore
 
 This project provides a key-value store for storing data. It includes the `KeyValueStore` class which allows you to set and get values by key. The values are stored in a file and can be of any type that can be serialized to JSON.
 
 The `DeltaTime` class is also part of this project. It represents a time span with properties for years, months, days, and hours. This class is used in the `KeyValueStore` class to determine when to remove old keys.
+
+This Project has been graduated to it's own repository [here](https://github.com/LaurentAerens/KeyValuePairStore). 
 
 ## AerensStoreUnittest
 
