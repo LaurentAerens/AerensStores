@@ -3,7 +3,7 @@ name: Release to NuGet
 on:
   release:
     types: [published]
-    
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,3 +21,27 @@ jobs:
       run: dotnet pack -c Release /p:Version=${{ github.event.release.tag_name }}  --no-build --output .
     - name: Push to NuGet
       run: dotnet nuget push "*.nupkg" --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+    - name: Push NuGet packages
+      run: |
+        # Define the list of projects to exclude
+        EXCLUDED_PROJECTS=("AerensStores.KeyValuePairStore")
+    
+        # Iterate over all .nupkg files
+        for file in *.nupkg
+        do
+          # Check if the file should be excluded
+          should_exclude=false
+          for project in "${EXCLUDED_PROJECTS[@]}"
+          do
+            if [[ $file == *"$project"* ]]; then
+              should_exclude=true
+              break
+            fi
+          done
+    
+          # If the file should not be excluded, push it
+          if [ "$should_exclude" = false ]; then
+            dotnet nuget push "$file" --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+          fi
+        done
+      shell: bash  
